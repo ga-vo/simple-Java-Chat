@@ -13,9 +13,9 @@ local.properties
 .loadpath
 
 #This project
-./simpleClient/.settings/
-./simpleClient/.classpath
-./simpleClient/.project
+/simpleClient/.settings/
+/simpleClient/.classpath
+/simpleClient/.project
 
 # External tool builders
 .externalToolBuilders/
