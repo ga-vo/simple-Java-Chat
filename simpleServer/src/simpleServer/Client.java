@@ -26,7 +26,6 @@ public class Client implements Runnable {
 			this.in = new DataInputStream(sck.getInputStream());
 			this.out = new DataOutputStream(sck.getOutputStream());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -67,10 +66,8 @@ public class Client implements Runnable {
 					sendMsg(this.getNick() + ": " + msg);
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				if (e.getMessage() != null) {
 					if (e.getMessage().equals("Socket closed")) {
-						// String msgE = e.getMessage();
 						if (this.remove) {
 							System.out.println("Conexión con " + this.getNick() + " finalizada");
 						}

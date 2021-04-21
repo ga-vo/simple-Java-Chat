@@ -6,45 +6,84 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.Scanner;
 
+/**
+ * Simple Client-Side console Chat!
+ * The SimpleClient program implements
+ * an console chat application using sockets and implements threads.
+ * <p>
+ *
+ * @author ga-vo
+ * @version 1.0
+ * @since 2021-03-10
+ */
+
 public class Main {
 
+	/**
+	 * This is the main method that initiates the connection 
+	 * with the server and handles the messages entered by the user.
+	 * 
+	 * @param args Unused.
+	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
 		Socket sck;
 		DataInputStream in;
 		DataOutputStream out;
-
-		String Host = "192.168.1.36";
+		
+		//Server ip
+		String Host = "localhost";
+		//Server port
 		final int PORT = 9090;
+		
 		Scanner sc = new Scanner(System.in);
-		Lector lector;
+		//Define a new Reader
+		Reader reader;
 		try {
 			String msg;
-			System.out.println("Ingrese su nombre: ");
+			System.out.println("Enter your name: ");
 			msg = sc.nextLine();
+			
+			//Create a new Socket with server's ip and port
 			sck = new Socket(Host, PORT);
+			
+			//Create Input and Output Streams
 			in = new DataInputStream(sck.getInputStream());
 			out = new DataOutputStream(sck.getOutputStream());
-			lector = new Lector(sck, in);
-			Thread t = new Thread(lector);
+			
+			//Initialize new Reader
+			reader = new Reader(sck, in);
+			
+			//Create a new Thread
+			Thread t = new Thread(reader);
+			
+			//Start the thread
 			t.start();
+			
+			//Send Nick to server
 			out.writeUTF(msg);
 
+			/**Continuously reads user messages and sends them
+			 * to the server 
+			 */
 			while (true) {
 				msg = sc.nextLine();
-				// System.out.println(msg);
 				out.writeUTF(msg);
+				/** If the user enters '/quit' call stop() method from Reader
+				 *  and break the cycle.
+				 */
 				if (msg.equals("/quit")) {
-					lector.stop();
+					reader.stop();
 					break;
 				}
 			}
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			if (e.getMessage().equals("An established connection was aborted by the software in your host machine") || e.getMessage().equals("Socket closed")) {
-				System.out.println("Conexión finalizada con el servidor");
+			/** Handles the exception of losign the connection
+			 * with server
+			 */
+			if (e.getMessage().equals("An established connection was aborted by the software in your host machine")
+					|| e.getMessage().equals("Socket closed")) {
+				System.out.println("Connection with the server terminated");
 			} else {
 				System.out.println(e.toString());
 				e.printStackTrace();
@@ -53,45 +92,68 @@ public class Main {
 		sc.close();
 
 	}
-
-	private static class Lector implements Runnable {
+	
+	
+	
+	/** Reader class, it's used to continuously read messages 
+	 * received from the server.
+	 *
+	 * @author ga-vo
+	 * @version 1.0
+	 * @since 2021-03-10
+	 * @see Runnable
+	 */
+	private static class Reader implements Runnable {
 		Socket sck;
 		DataInputStream in;
 		boolean flag;
-
-		public Lector(Socket sck, DataInputStream in) {
+		
+		/** Creates an reader with the specified socket and Datainputstream.
+		 * @param sck Connection socket from server
+		 * @param in Stream for data input.
+		*/
+		public Reader(Socket sck, DataInputStream in) {
 			this.sck = sck;
 			this.in = in;
 			this.flag = true;
 		}
 
+		
+		/** Continuously reads messages from the server
+		*/
 		@Override
 		public void run() {
-			// TODO Auto-generated method stub
 			String msgReceive;
 			try {
 				while (flag) {
 					msgReceive = in.readUTF();
 					System.out.println(msgReceive);
+					
+					/** If the message received is 'Remove from the server'
+					 * stop the thread, warn the user and try to close the socket connection
+					*/
 					if (msgReceive.equals("> Remove from the server") || msgReceive.equals("> Server closed")) {
 						this.stop();
 						System.out.println("Press enter");
 						try {
 							this.sck.close();
 						} catch (IOException e1) {
-							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}
 					}
 
 				}
+				
+				//Close socket connection
 				this.sck.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
-
+		
+		/**Sets the flag to false
+		 * It's used to stop the execution
+		 */
 		public void stop() {
 			flag = false;
 		}

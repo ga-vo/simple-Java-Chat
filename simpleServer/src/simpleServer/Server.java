@@ -43,9 +43,6 @@ public class Server {
 				out = new DataOutputStream(sck.getOutputStream());
 
 				String msg = in.readUTF();
-				// String ad=sck.getRemoteSocketAddress().toString();
-				// System.out.println("ad:"+ ad);
-				// System.out.println(msg);
 				if (msg.equals("/close")) {
 					System.out.println("Server finalized");
 					break;
@@ -54,17 +51,14 @@ public class Server {
 				this.newMessage("> " + msg + " ha ingresado");
 				this.broadcast();
 				out.writeUTF("Hola, bienvenido " + msg);
-				// System.out.println(sck.toString());
 				Client cliente = new Client(msg, sck, this);
 				clientes.add(cliente);
 				Thread t = new Thread(cliente);
 				t.start();
-				// sck.close();
 			}
 		} catch (IOException e) {
 			if (e.getMessage() != null) {
 				if (e.getMessage().equals("Socket closed")) {
-					// String msgE = e.getMessage();
 					System.out.println("Server Finalizado");
 				} else {
 					e.printStackTrace();
@@ -159,14 +153,12 @@ public class Server {
 
 		@Override
 		public void run() {
-			// TODO Auto-generated method stub
 			String c;
 			Pattern patternRemove, patternSendAll, patternSend;
 			Matcher matcherRemove, matcherSendAll, matcherSend;
 			String name;
 			while (this.server.getFlag()) {
 				c = sc.nextLine();
-				// System.out.println(c);
 
 				if (c.startsWith("/")) {
 					patternRemove = Pattern.compile("/remove[\s]+[[a-z]+|[0-9]+]", Pattern.CASE_INSENSITIVE);
@@ -182,12 +174,9 @@ public class Server {
 					int a;
 					if (matcherRemove.find()) {
 						a = c.toLowerCase().indexOf("/remove") + "/remove".length();
-						// System.out.println(a);
 						while (c.charAt(a) == ' ') {
 							a++;
 						}
-						// System.out.println(a);
-						// if()
 						name = c.substring(a);
 						System.out.println("Removing " + name + "...");
 						this.server.removeClient(name);
